@@ -10,6 +10,8 @@ app.use('/api/events', require('./routes/events'));
 
 app.use('/api/venue', require('./routes/venue'));
 
+app.use('/api/review', require('./routes/review'));
+
 app.use('/api/artist', require('./routes/artist'));
 
 app.use('/api/category', require('./routes/category'));

@@ -1,5 +1,321 @@
-// Screen này là khi thanh toán vé
-import React, { useState } from 'react';
+// import React, { useState, useEffect } from 'react';
+// import {
+//   View,
+//   Text,
+//   Image,
+//   ScrollView,
+//   StyleSheet,
+//   Button,
+//   Alert,
+//   TextInput,
+//   TouchableOpacity,
+// } from 'react-native';
+// import axios from 'axios';
+// import { Picker } from '@react-native-picker/picker';
+// import AsyncStorage from '@react-native-async-storage/async-storage';
+// import { FontAwesome } from '@expo/vector-icons';
+
+// const API_BASE = 'http://10.0.2.2:3000/api';
+
+// export default function EventDetailScreen({ route }) {
+//   const { event } = route.params;
+//   const [quantity, setQuantity] = useState(1);
+//   const [seatNumber, setSeatNumber] = useState(1);
+//   const [paymentMethod, setPaymentMethod] = useState("Momo");
+//   const [eventData, setEventData] = useState(event);
+
+//   // state review
+//   const [reviews, setReviews] = useState([]);
+//   const [newRating, setNewRating] = useState(0);
+//   const [newComment, setNewComment] = useState("");
+
+//   const imageUrl = eventData?.image?.startsWith('http')
+//     ? eventData.image
+//     : `http://192.168.200.35:3000/uploads/${eventData?.image}`;
+
+//   const formatPrice = (price) => {
+//     if (!price || isNaN(price)) return '0 VNĐ';
+//     return parseInt(price).toLocaleString('vi-VN') + ' VNĐ';
+//   };
+
+//   const formatDate = (dateString) => {
+//     if (!dateString) return 'Không rõ';
+//     const date = new Date(dateString);
+//     if (isNaN(date.getTime())) return 'Không rõ';
+//     const day = ('0' + date.getDate()).slice(-2);
+//     const month = ('0' + (date.getMonth() + 1)).slice(-2);
+//     const year = date.getFullYear();
+//     return `${day}/${month}/${year}`;
+//   };
+
+//   const formatTime = (dateString) => {
+//     if (!dateString) return 'Không rõ';
+//     const date = new Date(dateString);
+//     if (isNaN(date.getTime())) return 'Không rõ';
+//     const hours = ('0' + date.getHours()).slice(-2);
+//     const minutes = ('0' + date.getMinutes()).slice(-2);
+//     return `${hours}:${minutes}`;
+//   };
+
+//   const confirmBooking = () => {
+//     Alert.alert(
+//       "Xác nhận đặt vé",
+//       `Bạn muốn mua ${quantity} vé cho sự kiện "${eventData.name}"?\nPhương thức: ${paymentMethod}`,
+//       [
+//         { text: "Hủy", style: "cancel" },
+//         { text: "Xác nhận", onPress: () => handleBooking() }
+//       ]
+//     );
+//   };
+
+//   const fetchEventDetail = async () => {
+//     try {
+//       const res = await axios.get(`${API_BASE}/events/${eventData.id_event}`);
+//       setEventData(res.data);
+//     } catch (err) {
+//       console.error("Lỗi tải event:", err);
+//     }
+//   };
+
+//   const handleBooking = async () => {
+//     try {
+//       const token = await AsyncStorage.getItem('token');
+
+//       const res = await axios.post(
+//         `${API_BASE}/booking`,
+//         {
+//           id_event: eventData.id_event,
+//           quantity,
+//           seat_number: seatNumber,
+//           payment_method: paymentMethod
+//         },
+//         {
+//           headers: { Authorization: `Bearer ${token}` }
+//         }
+//       );
+
+//       if (res.data.success) {
+//         Alert.alert('Thành công', 'Bạn đã đặt vé thành công!');
+//         await fetchEventDetail(); // Cập nhật lại số ghế còn lại
+//       } else {
+//         Alert.alert('Thất bại', 'Không thể đặt vé.');
+//       }
+//     } catch (error) {
+//       console.error('Lỗi đặt vé:', error);
+//       Alert.alert('Lỗi', 'Không thể kết nối đến máy chủ.');
+//     }
+//   };
+
+//   // ================= REVIEW =================
+//   const fetchReviews = async () => {
+//     try {
+//       const res = await axios.get(`${API_BASE}/review/${event.id_event}`);
+//       setReviews(res.data);
+//     } catch (err) {
+//       console.error("Lỗi lấy review:", err);
+//     }
+//   };
+
+//   useEffect(() => {
+//     fetchReviews();
+//   }, []);
+
+//   const handleCreateReview = async () => {
+//     try {
+//       const token = await AsyncStorage.getItem('token');
+//       const res = await axios.post(
+//         `${API_BASE}/review`,
+//         {
+//           id_event: event.id_event,
+//           rating: newRating,
+//           comment: newComment,
+//         },
+//         { headers: { Authorization: `Bearer ${token}` } }
+//       );
+//       if (res.data.success) {
+//         setNewRating(0);
+//         setNewComment("");
+//         fetchReviews();
+//       } else {
+//         Alert.alert("Lỗi", "Không thể gửi đánh giá");
+//       }
+//     } catch (err) {
+//       console.error("Lỗi tạo review:", err);
+//     }
+//   };
+
+//   const renderStars = (rating) => {
+//     return [...Array(5)].map((_, i) => (
+//       <FontAwesome
+//         key={i}
+//         name={i < rating ? "star" : "star-o"}
+//         size={18}
+//         color="gold"
+//       />
+//     ));
+//   };
+
+//   // ================= RENDER =================
+//   return (
+//     <ScrollView style={styles.container}>
+//       <Image
+//         source={{
+//           uri:
+//             imageUrl && imageUrl !== 'NULL'
+//               ? imageUrl
+//               : 'https://via.placeholder.com/400x200.png?text=No+Image',
+//         }}
+//         style={styles.image}
+//       />
+//       <View style={styles.content}>
+//         <Text style={styles.title}>{eventData?.name || 'Không rõ tên sự kiện'}</Text>
+//         <Text style={styles.info}>
+//           Ngày diễn ra: {formatDate(eventData?.start_time)} - {formatDate(eventData?.end_time)}
+//         </Text>
+//         <Text style={styles.info}>
+//           Địa điểm: {eventData?.venue_name || 'Không rõ'}
+//         </Text>
+//         <Text style={styles.info}>
+//           Thời gian diễn ra: {formatTime(eventData?.start_time)} - {formatTime(eventData?.end_time)}
+//         </Text>
+
+//         <Text style={styles.info}>
+//           Số ghế còn lại: {isNaN(eventData?.seat_left) ? 0 : Number(eventData.seat_left).toLocaleString('vi-VN')}
+//         </Text>
+//         <Text style={styles.price}>Giá vé: {formatPrice(eventData?.ticket_price)}</Text>
+//         <Text style={styles.description}>Mô tả: {eventData?.description || ''}</Text>
+
+//         <View style={{ marginVertical: 10 }}>
+//           <Text>Số lượng vé:</Text>
+//           <TextInput
+//             value={quantity.toString()}
+//             onChangeText={(text) => setQuantity(Number(text))}
+//             keyboardType="numeric"
+//             style={styles.input}
+//           />
+
+//           <Text style={{ marginTop: 10 }}>Phương thức thanh toán:</Text>
+//           <View style={styles.pickerContainer}>
+//             <Picker
+//               selectedValue={paymentMethod}
+//               onValueChange={(itemValue) => setPaymentMethod(itemValue)}
+//             >
+//               <Picker.Item label="Thanh toán bằng Momo" value="Momo" />
+//               <Picker.Item label="Thanh toán bằng Ngân hàng" value="Bank" />
+//             </Picker>
+//           </View>
+//         </View>
+
+//         <View style={styles.buttonContainer}>
+//           <Button title="Đặt vé" onPress={confirmBooking} color="#1e90ff" />
+//         </View>
+
+//         {/* ========== KHU VỰC REVIEW ========== */}
+//         <View style={{ marginTop: 20 }}>
+//           <Text style={styles.reviewTitle}>Đánh giá sự kiện</Text>
+//           <ScrollView style={styles.reviewList}>
+//             {reviews.map((item, index) => (
+//               <View key={index} style={styles.reviewCard}>
+//                 <Text style={styles.username}>{item.username}</Text>
+//                 <View style={{ flexDirection: "row" }}>
+//                   {renderStars(item.rating)}
+//                 </View>
+//                 <Text style={styles.comment}>{item.comment}</Text>
+//                 <Text style={styles.date}>
+//                   {new Date(item.review_date).toLocaleString("vi-VN")}
+//                 </Text>
+//               </View>
+//             ))}
+//           </ScrollView>
+//         </View>
+
+//         {/* Form thêm review */}
+//         <View style={styles.addReview}>
+//           <Text style={{ fontWeight: "bold" }}>Thêm đánh giá của bạn:</Text>
+//           <View style={{ flexDirection: "row", marginVertical: 5 }}>
+//             {[1, 2, 3, 4, 5].map((star) => (
+//               <TouchableOpacity key={star} onPress={() => setNewRating(star)}>
+//                 <FontAwesome
+//                   name={star <= newRating ? "star" : "star-o"}
+//                   size={24}
+//                   color="gold"
+//                 />
+//               </TouchableOpacity>
+//             ))}
+//           </View>
+//           <TextInput
+//             style={styles.input}
+//             placeholder="Nhập cảm nhận..."
+//             value={newComment}
+//             onChangeText={setNewComment}
+//           />
+//           <Button title="Gửi đánh giá" onPress={handleCreateReview} />
+//         </View>
+//       </View>
+//     </ScrollView>
+//   );
+// }
+
+// const styles = StyleSheet.create({
+//   container: { flex: 1 },
+//   image: {
+//     width: '100%',
+//     height: 200,
+//     resizeMode: 'cover',
+//     borderRadius: 10,
+//   },
+//   content: { padding: 16 },
+//   title: { fontSize: 24, fontWeight: 'bold', marginBottom: 8 },
+//   info: { fontSize: 16, marginBottom: 4 },
+//   description: { fontSize: 16, marginTop: 12, lineHeight: 22 },
+//   buttonContainer: {
+//     marginTop: 20,
+//     borderRadius: 8,
+//     overflow: 'hidden',
+//   },
+//   price: {
+//     fontSize: 20,
+//     fontWeight: 'bold',
+//     color: '#e91e63',
+//     marginVertical: 8,
+//   },
+//   input: {
+//     borderWidth: 1,
+//     borderColor: '#ccc',
+//     padding: 8,
+//     marginBottom: 8,
+//     borderRadius: 5,
+//   },
+//   pickerContainer: {
+//     borderWidth: 1,
+//     borderColor: '#ccc',
+//     borderRadius: 5,
+//     overflow: 'hidden',
+//     marginTop: 5,
+//   },
+//   reviewTitle: { fontSize: 20, fontWeight: "bold", marginBottom: 10 },
+//   reviewList: { maxHeight: 300 },
+//   reviewCard: {
+//     padding: 10,
+//     marginBottom: 10,
+//     backgroundColor: "#f9f9f9",
+//     borderRadius: 8,
+//     elevation: 2,
+//   },
+//   username: { fontWeight: "bold", fontSize: 16 },
+//   comment: { marginVertical: 5, fontSize: 14 },
+//   date: { fontSize: 12, color: "#555" },
+//   addReview: {
+//     marginTop: 20,
+//     padding: 10,
+//     borderWidth: 1,
+//     borderColor: "#ccc",
+//     borderRadius: 8,
+//   },
+// });
+
+
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -9,13 +325,14 @@ import {
   Button,
   Alert,
   TextInput,
+  TouchableOpacity,
 } from 'react-native';
 import axios from 'axios';
 import { Picker } from '@react-native-picker/picker';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { FontAwesome } from '@expo/vector-icons';
 
 const API_BASE = 'http://10.0.2.2:3000/api';
-
 
 export default function EventDetailScreen({ route }) {
   const { event } = route.params;
@@ -24,10 +341,14 @@ export default function EventDetailScreen({ route }) {
   const [paymentMethod, setPaymentMethod] = useState("Momo");
   const [eventData, setEventData] = useState(event);
 
+  // state review
+  const [reviews, setReviews] = useState([]);
+  const [newRating, setNewRating] = useState(0);
+  const [newComment, setNewComment] = useState("");
+
   const imageUrl = eventData?.image?.startsWith('http')
     ? eventData.image
     : `http://192.168.200.35:3000/uploads/${eventData?.image}`;
-
 
   const formatPrice = (price) => {
     if (!price || isNaN(price)) return '0 VNĐ';
@@ -52,7 +373,6 @@ export default function EventDetailScreen({ route }) {
     const minutes = ('0' + date.getMinutes()).slice(-2);
     return `${hours}:${minutes}`;
   };
-
 
   const confirmBooking = () => {
     Alert.alert(
@@ -103,6 +423,56 @@ export default function EventDetailScreen({ route }) {
     }
   };
 
+  // ================= REVIEW =================
+  const fetchReviews = async () => {
+    try {
+      const res = await axios.get(`${API_BASE}/review/${event.id_event}`);
+      setReviews(res.data);
+    } catch (err) {
+      console.error("Lỗi lấy review:", err);
+    }
+  };
+
+  useEffect(() => {
+    fetchReviews();
+  }, []);
+
+  const handleCreateReview = async () => {
+    try {
+      const token = await AsyncStorage.getItem('token');
+      const res = await axios.post(
+        `${API_BASE}/review`,
+        {
+          id_event: event.id_event,
+          rating: newRating,
+          comment: newComment,
+        },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      if (res.data.success) {
+        setNewRating(0);
+        setNewComment("");
+        fetchReviews();
+      } else {
+        Alert.alert("Lỗi", "Không thể gửi đánh giá");
+      }
+    } catch (err) {
+      console.error("Lỗi tạo review:", err);
+    }
+  };
+
+  const renderStars = (rating) => {
+    return [...Array(5)].map((_, i) => (
+      <FontAwesome
+        key={i}
+        name={i < rating ? "star" : "star-o"}
+        size={18}
+        color="gold"
+      />
+    ));
+  };
+
+  // ================= RENDER =================
   return (
     <ScrollView style={styles.container}>
       <Image
@@ -156,6 +526,54 @@ export default function EventDetailScreen({ route }) {
         <View style={styles.buttonContainer}>
           <Button title="Đặt vé" onPress={confirmBooking} color="#1e90ff" />
         </View>
+
+        {/* ========== KHU VỰC REVIEW ========== */}
+        <View style={{ marginTop: 20 }}>
+          <Text style={styles.reviewTitle}>Đánh giá sự kiện</Text>
+
+          {/* Scroll riêng cho list review */}
+          <View style={{ maxHeight: 300 }}>
+            <ScrollView style={styles.reviewList} scrollEnabled={true}
+                        showsVerticalScrollIndicator={true}
+                        nestedScrollEnabled={true}>
+              {reviews.map((item, index) => (
+                <View key={index} style={styles.reviewCard}>
+                  <Text style={styles.username}>{item.username}</Text>
+                  <View style={{ flexDirection: "row" }}>
+                    {renderStars(item.rating)}
+                  </View>
+                  <Text style={styles.comment}>{item.comment}</Text>
+                  <Text style={styles.date}>
+                    {new Date(item.review_date).toLocaleString("vi-VN")}
+                  </Text>
+                </View>
+              ))}
+            </ScrollView>
+          </View>
+
+          {/* Form thêm review */}
+          <View style={styles.addReview}>
+            <Text style={{ fontWeight: "bold" }}>Thêm đánh giá của bạn:</Text>
+            <View style={{ flexDirection: "row", marginVertical: 5 }}>
+              {[1, 2, 3, 4, 5].map((star) => (
+                <TouchableOpacity key={star} onPress={() => setNewRating(star)}>
+                  <FontAwesome
+                    name={star <= newRating ? "star" : "star-o"}
+                    size={24}
+                    color="gold"
+                  />
+                </TouchableOpacity>
+              ))}
+            </View>
+            <TextInput
+              style={styles.input}
+              placeholder="Nhập cảm nhận..."
+              value={newComment}
+              onChangeText={setNewComment}
+            />
+            <Button title="Gửi đánh giá" onPress={handleCreateReview} color="#1e90ff" />
+          </View>
+        </View>
       </View>
     </ScrollView>
   );
@@ -189,12 +607,33 @@ const styles = StyleSheet.create({
     borderColor: '#ccc',
     padding: 8,
     marginBottom: 8,
+    borderRadius: 5,
   },
   pickerContainer: {
     borderWidth: 1,
     borderColor: '#ccc',
     borderRadius: 5,
     overflow: 'hidden',
-    marginTop: 5
-  }
+    marginTop: 5,
+  },
+  reviewTitle: { fontSize: 20, fontWeight: "bold", marginBottom: 10 },
+  reviewList: { flexGrow: 0 },
+  reviewCard: {
+    padding: 10,
+    marginBottom: 10,
+    backgroundColor: "#f9f9f9",
+    borderRadius: 8,
+    elevation: 2,
+  },
+  username: { fontWeight: "bold", fontSize: 16 },
+  comment: { marginVertical: 5, fontSize: 14 },
+  date: { fontSize: 12, color: "#555" },
+  addReview: {
+    marginTop: 20,
+    padding: 10,
+    borderWidth: 1,
+    borderColor: "#ccc",
+    borderRadius: 8,
+    backgroundColor: "#fff",
+  },
 });

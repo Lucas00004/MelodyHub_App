@@ -6,6 +6,7 @@ const authMiddleware = require('../middleware/auth');
 // Lấy user
 router.get('/', authMiddleware, profile.getProfile);
 
+
 //Sửa user
 router.put('/', authMiddleware, profile.changePassword);
 
